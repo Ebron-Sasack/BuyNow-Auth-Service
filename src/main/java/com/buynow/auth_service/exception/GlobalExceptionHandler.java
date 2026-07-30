@@ -42,6 +42,15 @@ public class GlobalExceptionHandler {
                 .body(build(HttpStatus.UNAUTHORIZED, ex.getMessage(), request));
     }
 
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            InvalidTokenException ex,
+            HttpServletRequest request) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(build(HttpStatus.UNAUTHORIZED, ex.getMessage(), request));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException ex,

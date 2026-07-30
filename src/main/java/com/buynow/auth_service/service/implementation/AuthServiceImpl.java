@@ -5,10 +5,12 @@ import com.buynow.auth_service.dto.request.RegisterRequest;
 import com.buynow.auth_service.dto.response.LoginResponse;
 import com.buynow.auth_service.dto.response.RegisterResponse;
 import com.buynow.auth_service.dto.response.UserInfoResponse;
+import com.buynow.auth_service.dto.response.ValidateTokenResponse;
 import com.buynow.auth_service.entity.Role;
 import com.buynow.auth_service.entity.UserCredential;
 import com.buynow.auth_service.enums.RoleType;
 import com.buynow.auth_service.exception.AlreadyExistsException;
+import com.buynow.auth_service.exception.InvalidTokenException;
 import com.buynow.auth_service.exception.ResourceNotFoundException;
 import com.buynow.auth_service.feign.UserServiceClient;
 import com.buynow.auth_service.dto.request.CreateUserRequest;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -129,7 +132,24 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean validateToken(String token) {
-        return !jwtService.isTokenExpired(token);
+    public ValidateTokenResponse validateToken(String token) {
+
+        if (!jwtService.isTokenValid(token)) {
+            throw new InvalidTokenException("Invalid JWT Token");
+        }
+
+        String username = jwtService.extractUsername(token);
+
+        UserCredential user = userCredentialRepository.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        RoleType role = user.getRole().getRoleName();
+
+        return ValidateTokenResponse.builder()
+                .valid(true)
+                .userId(user.getId())
+                .username(user.getEmail())
+                .role(role)
+                .build();
     }
 }

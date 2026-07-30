@@ -78,6 +78,15 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public boolean isTokenValid(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public boolean isTokenExpired(String token) {
 
         return extractClaim(token, Claims::getExpiration)

@@ -6,6 +6,8 @@ import com.buynow.auth_service.dto.request.ValidateTokenRequest;
 import com.buynow.auth_service.dto.response.LoginResponse;
 import com.buynow.auth_service.dto.response.RegisterResponse;
 import com.buynow.auth_service.dto.response.UserInfoResponse;
+import com.buynow.auth_service.dto.response.ValidateTokenResponse;
+import com.buynow.auth_service.exception.InvalidTokenException;
 import com.buynow.auth_service.payload.ApiResponse;
 import com.buynow.auth_service.service.AuthService;
 import jakarta.validation.Valid;
@@ -44,10 +46,19 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<ApiResponse<Boolean>> validateToken(
-            @Valid @RequestBody ValidateTokenRequest request) {
+    public ResponseEntity<ApiResponse<ValidateTokenResponse>> validateToken(
+            @RequestHeader("Authorization") String authHeader) {
 
-        boolean valid = authService.validateToken(request.getToken());
-        return ResponseEntity.ok(new ApiResponse<>("Token validation completed", valid));
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new InvalidTokenException("Missing or invalid Authorization header");
+        }
+
+        String token = authHeader.substring(7);
+
+        ValidateTokenResponse response = authService.validateToken(token);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>("Token validation successful", response)
+        );
     }
 }

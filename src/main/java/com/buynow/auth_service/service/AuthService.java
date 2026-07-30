@@ -5,6 +5,7 @@ import com.buynow.auth_service.dto.request.RegisterRequest;
 import com.buynow.auth_service.dto.response.LoginResponse;
 import com.buynow.auth_service.dto.response.RegisterResponse;
 import com.buynow.auth_service.dto.response.UserInfoResponse;
+import com.buynow.auth_service.dto.response.ValidateTokenResponse;
 
 public interface AuthService {
 
@@ -14,6 +15,6 @@ public interface AuthService {
 
     UserInfoResponse getCurrentUser();
 
-    boolean validateToken(String token);
+    ValidateTokenResponse validateToken(String token);
 
 }
